@@ -1,0 +1,54 @@
+name: Build, Unit Test, and Deploy .NET Project
+on:
+  workflow_call:
+    inputs:
+        USER_NAME:
+            description: 'Username for private NuGet feed'
+            required: true
+            type: string
+        ARTIFACT_RETENTION_DAYS:
+            description: 'Number of days to retain build artifacts'
+            required: false
+            type: number
+            default: 1
+        WORKING_DIRECTORY:
+            description: 'Working directory for the build process'
+            required: false
+            type: string
+            default: '/'
+        DOTNET_VERSION:
+            description: 'List of .NET versions to build against'
+            required: true
+            type: string
+        PROJECT_NAME:
+            description: 'Name of the project/package'
+            required: true
+            type: string
+jobs:
+    build:
+      uses: adaptive-network/.github/.github/workflows/build_dotnet.yml@release
+      with:
+        USER_NAME: ${{ inputs.USER_NAME }}
+        ARTIFACT_RETENTION_DAYS: ${{ inputs.ARTIFACT_RETENTION_DAYS }}
+        WORKING_DIRECTORY: ${{ inputs.WORKING_DIRECTORY }}
+        DOTNET_VERSION: ${{ inputs.DOTNET_VERSION }}
+      secrets: inherit
+    unit_tests:
+        uses: adaptive-network/.github/.github/workflows/unit_test_dotnet.yml@release
+        needs: build
+        with:
+          USER_NAME: ${{ inputs.USER_NAME }}
+          ARTIFACT_RETENTION_DAYS: ${{ inputs.ARTIFACT_RETENTION_DAYS }}
+          WORKING_DIRECTORY: ${{ inputs.WORKING_DIRECTORY }}
+          DOTNET_VERSION: ${{ inputs.DOTNET_VERSION }}
+        secrets: inherit
+    deploy:
+        uses: adaptive-network/.github/.github/workflows/deploy_dotnet.yml@release
+        needs: [build, unit_tests]
+        with:
+          USER_NAME: ${{ inputs.USER_NAME }}
+          ARTIFACT_RETENTION_DAYS: ${{ inputs.ARTIFACT_RETENTION_DAYS }}
+          WORKING_DIRECTORY: ${{ inputs.WORKING_DIRECTORY }}
+          DOTNET_VERSION: ${{ inputs.DOTNET_VERSION }}
+          PROJECT_NAME: ${{ inputs.PROJECT_NAME }}
+        secrets: inherit
