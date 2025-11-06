@@ -1,0 +1,44 @@
+name: Run unit tests
+on:
+  workflow_call:
+    inputs:
+        USER_NAME:
+            description: 'Username for private NuGet feed'
+            required: true
+            type: string
+        ARTIFACT_RETENTION_DAYS:
+            description: 'Number of days to retain build artifacts'
+            required: false
+            type: number
+            default: 1
+        WORKING_DIRECTORY:
+            description: 'Working directory for the build process'
+            required: false
+            type: string
+            default: '/'
+        DOTNET_VERSION:
+            description: 'List of .NET versions to build against'
+            required: true
+            type: string
+jobs:
+    unit_tests:
+      runs-on: windows-latest
+      name: Run unit tests
+
+      steps:
+      - name: Checkout code
+        uses: actions/checkout@v4.1.7
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4.0.1
+        with:
+            dotnet-version: ${{ inputs.DOTNET_VERSION }}
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+            name: build-artifacts-${{ inputs.DOTNET_VERSION }}
+            path: ${{ inputs.WORKING_DIRECTORY }}
+
+      - name: Run tests
+        run: dotnet test --no-restore --filter TestCategory=Unit
+        working-directory: ${{ inputs.WORKING_DIRECTORY }}

@@ -1,0 +1,62 @@
+name: Deploy .NET Package
+on:
+  workflow_call:
+    inputs:
+        USER_NAME:
+            description: 'Username for private NuGet feed'
+            required: true
+            type: string
+        ARTIFACT_RETENTION_DAYS:
+            description: 'Number of days to retain build artifacts'
+            required: false
+            type: number
+            default: 1
+        WORKING_DIRECTORY:
+            description: 'Working directory for the build process'
+            required: false
+            type: string
+            default: '/'
+        DOTNET_VERSION:
+            description: 'List of .NET versions to build against'
+            required: true
+            type: string
+        PROJECT_NAME:
+            description: 'The name of the project to deploy'
+            required: true
+            type: string
+
+jobs:
+  deploy:
+    runs-on: windows-latest
+    name: Deploy package
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4.1.7
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4.0.1
+      with:
+        dotnet-version: ${{ inputs.DOTNET_VERSION }}
+
+    - name: Add GitHub NuGet Source
+      run: |
+        echo Adding NuGet Source
+        dotnet nuget add source --username ${{ inputs.USER_NAME }} --password ${{ secrets.PACKAGE_MANAGER_TOKEN }} --store-password-in-clear-text --name github ${{ vars.PRIVATE_NUGET_FEED }}
+
+    - name: Restore dependencies
+      run: dotnet restore
+      env:
+        NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Build
+      run: dotnet build --configuration Release --no-restore
+
+    - name: Pack
+      run: dotnet pack --configuration Release --output ./nupkg /p:PackageVersion=${{ github.event.release.tag_name }}
+
+    - name: Publish to NuGet
+      run: |
+        echo ${{secrets.PACKAGE_MANAGER_TOKEN}}
+        dotnet nuget push ./nupkg/${{inputs.PROJECT_NAME}}.${{ github.event.release.tag_name }}.nupkg --source ${{vars.PRIVATE_NUGET_FEED}} --api-key ${{secrets.PACKAGE_MANAGER_TOKEN}}
+        dotnet nuget push ./nupkg/${{inputs.PROJECT_NAME}}.${{ github.event.release.tag_name }}.snupkg --source ${{vars.PRIVATE_NUGET_FEED}} --api-key ${{secrets.PACKAGE_MANAGER_TOKEN}}

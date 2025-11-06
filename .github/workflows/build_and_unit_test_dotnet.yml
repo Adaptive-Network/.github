@@ -1,0 +1,29 @@
+name: Build and Test .NET Project
+on:
+  workflow_call:
+    inputs:
+        USER_NAME:
+            description: 'Username for private NuGet feed'
+            required: true
+            type: string
+        ARTIFACT_RETENTION_DAYS:
+            description: 'Number of days to retain build artifacts'
+            required: false
+            type: number
+            default: 1
+        WORKING_DIRECTORY:
+            description: 'Working directory for the build process'
+            required: false
+            type: string
+            default: '/'
+        DOTNET_VERSION:
+            description: 'List of .NET versions to build against'
+            required: true
+            type: string
+jobs:
+    build:
+      uses: adaptive-network/.github/.github/workflows/build_dotnet.yml@main
+      with:
+        dotnet_versions: |
+          ['8.0.x', '9.0.x', '7.0.x']
+      secrets: inherit

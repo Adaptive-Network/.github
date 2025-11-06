@@ -1,0 +1,67 @@
+name: Build and Test
+
+on:
+  workflow_call:
+    inputs:
+        USER_NAME:
+            description: 'Username for private NuGet feed'
+            required: true
+            type: string
+        ARTIFACT_RETENTION_DAYS:
+            description: 'Number of days to retain build artifacts'
+            required: false
+            type: number
+            default: 1
+        WORKING_DIRECTORY:
+            description: 'Working directory for the build process'
+            required: false
+            type: string
+            default: '/'
+        DOTNET_VERSION:
+            description: 'List of .NET versions to build against'
+            required: true
+            type: string
+jobs:
+  build:
+    name: Build project
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4.1.7
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4.0.1
+        with:
+          dotnet-version: ${{ inputs.DOTNET_VERSION }}
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      - name: Add GitHub NuGet Source
+        run: |
+          echo Adding NuGet Source
+          dotnet nuget add source --username ${{inputs.USER_NAME}} --password ${{secrets.PACKAGE_MANAGER_TOKEN}} --store-password-in-clear-text --name github ${{vars.PRIVATE_NUGET_FEED}}
+        working-directory: ./src/backend
+
+      - name: Restore dependencies
+        run: dotnet restore
+        working-directory: ./src/backend
+        env:
+          NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build solution
+        run: dotnet build --configuration Release --no-restore
+        working-directory: ${{ inputs.WORKING_DIRECTORY }}
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts-${{ inputs.DOTNET_VERSION }}
+          path: |
+            ${{ inputs.WORKING_DIRECTORY }}/**/bin/Release/**
+            ${{ inputs.WORKING_DIRECTORY }}/**/obj/Release/**
+          retention-days: ${{ inputs.ARTIFACT_RETENTION_DAYS }}
