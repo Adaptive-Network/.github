@@ -32,12 +32,15 @@ jobs:
         uses: actions/setup-dotnet@v4.0.1
         with:
             dotnet-version: ${{ inputs.DOTNET_VERSION }}
-
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
-        with:
-            name: build-artifacts-${{ inputs.DOTNET_VERSION }}
-            path: ${{ inputs.WORKING_DIRECTORY }}
+      - name: Add GitHub NuGet Source
+        run: |
+          echo Adding NuGet Source
+          dotnet nuget add source --username ${{inputs.USER_NAME}} --password ${{ secrets.PACKAGE_MANAGER_TOKEN }} --store-password-in-clear-text --name github ${{vars.PRIVATE_NUGET_FEED}}
+      - name: Restore dependencies
+        run: dotnet restore
+        working-directory: ${{ inputs.WORKING_DIRECTORY }}
+        env:
+          NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Run tests
         run: dotnet test --no-restore --filter TestCategory=Unit
