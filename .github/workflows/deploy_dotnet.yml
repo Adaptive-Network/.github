@@ -38,24 +38,29 @@ jobs:
       uses: actions/setup-dotnet@v4.0.1
       with:
         dotnet-version: ${{ inputs.DOTNET_VERSION }}
+      
 
     - name: Add GitHub NuGet Source
       run: |
         echo Adding NuGet Source
         dotnet nuget add source --username ${{ inputs.USER_NAME }} --password ${{ secrets.PACKAGE_MANAGER_TOKEN }} --store-password-in-clear-text --name github ${{ vars.PRIVATE_NUGET_FEED }}
-
+      working-directory: ${{ inputs.WORKING_DIRECTORY }}
     - name: Restore dependencies
       run: dotnet restore
+      working-directory: ${{ inputs.WORKING_DIRECTORY }}
       env:
         NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Build
       run: dotnet build --configuration Release --no-restore
+      working-directory: ${{ inputs.WORKING_DIRECTORY }}
 
     - name: Pack
       run: dotnet pack --configuration Release --output ./nupkg /p:PackageVersion=${{ github.event.release.tag_name }}
+      working-directory: ${{ inputs.WORKING_DIRECTORY }}
 
     - name: Publish to NuGet
+      working-directory: ${{ inputs.WORKING_DIRECTORY }}
       run: |
         echo ${{secrets.PACKAGE_MANAGER_TOKEN}}
         dotnet nuget push ./nupkg/${{inputs.PROJECT_NAME}}.${{ github.event.release.tag_name }}.nupkg --source ${{vars.PRIVATE_NUGET_FEED}} --api-key ${{secrets.PACKAGE_MANAGER_TOKEN}}
