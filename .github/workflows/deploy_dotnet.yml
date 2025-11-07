@@ -24,6 +24,10 @@ on:
             description: 'The name of the project to deploy'
             required: true
             type: string
+        PACKAGE_VERSION:
+            description: 'Version number for the package'
+            required: true
+            type: string
 
 jobs:
   deploy:
@@ -63,5 +67,5 @@ jobs:
       working-directory: ${{ inputs.WORKING_DIRECTORY }}
       run: |
         echo ${{secrets.PACKAGE_MANAGER_TOKEN}}
-        dotnet nuget push ./nupkg/${{inputs.PROJECT_NAME}}.${{ github.event.release.tag_name }}.nupkg --source ${{vars.PRIVATE_NUGET_FEED}} --api-key ${{secrets.PACKAGE_MANAGER_TOKEN}}
-        dotnet nuget push ./nupkg/${{inputs.PROJECT_NAME}}.${{ github.event.release.tag_name }}.snupkg --source ${{vars.PRIVATE_NUGET_FEED}} --api-key ${{secrets.PACKAGE_MANAGER_TOKEN}}
+        dotnet nuget push ./nupkg/${{inputs.PROJECT_NAME}}.${{ inputs.PACKAGE_VERSION }}.nupkg --source ${{vars.PRIVATE_NUGET_FEED}} --api-key ${{secrets.PACKAGE_MANAGER_TOKEN}}
+        dotnet nuget push ./nupkg/${{inputs.PROJECT_NAME}}.${{ inputs.PACKAGE_VERSION }}.snupkg --source ${{vars.PRIVATE_NUGET_FEED}} --api-key ${{secrets.PACKAGE_MANAGER_TOKEN}}
