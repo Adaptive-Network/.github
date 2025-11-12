@@ -45,11 +45,11 @@ jobs:
         run: |
           echo Adding NuGet Source
           dotnet nuget add source --username ${{inputs.USER_NAME}} --password ${{secrets.PACKAGE_MANAGER_TOKEN}} --store-password-in-clear-text --name github ${{vars.PRIVATE_NUGET_FEED}}
-        working-directory: ./src/backend
+        working-directory: ${{ inputs.WORKING_DIRECTORY }}
 
       - name: Restore dependencies
         run: dotnet restore
-        working-directory: ./src/backend
+        working-directory: ${{ inputs.WORKING_DIRECTORY }}
         env:
           NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
