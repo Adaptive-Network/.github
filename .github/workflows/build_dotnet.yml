@@ -53,13 +53,13 @@ jobs:
         working-directory: ${{ inputs.WORKING_DIRECTORY }}
 
       - name: Restore dependencies
-        run: dotnet restore --solution ${{inputs.SOLUTION_RELATIVE_PATH}}
+        run: dotnet restore ${{inputs.SOLUTION_RELATIVE_PATH}}
         working-directory: ${{ inputs.WORKING_DIRECTORY }}
         env:
           NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build solution
-        run: dotnet build --solution ${{inputs.SOLUTION_RELATIVE_PATH}} --configuration Release --no-restore
+        run: dotnet build ${{inputs.SOLUTION_RELATIVE_PATH}} --configuration Release --no-restore
         working-directory: ${{ inputs.WORKING_DIRECTORY }}
 
       - name: Upload build artifacts
