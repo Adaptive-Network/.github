@@ -20,6 +20,10 @@ on:
             description: 'List of .NET versions to build against'
             required: true
             type: string
+        SOLUTION_RELATIVE_PATH:
+            description: 'The solution file path'
+            required: true
+            type: string
 jobs:
   integration_tests:
     runs-on: ubuntu-latest # Docker works better on Linux runners
@@ -51,5 +55,5 @@ jobs:
           NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Run integration tests
-        run: dotnet test --filter TestCategory=Integration --no-restore
+        run: dotnet test ${{inputs.SOLUTION_RELATIVE_PATH}} --filter TestCategory=Integration --no-restore
         working-directory: ${{ inputs.WORKING_DIRECTORY }}
