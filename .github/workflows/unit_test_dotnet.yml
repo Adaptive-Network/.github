@@ -20,6 +20,10 @@ on:
             description: 'List of .NET versions to build against'
             required: true
             type: string
+        SOLUTION_RELATIVE_PATH:
+            description: 'The path of the solution'
+            required: true
+            type: string
 jobs:
     unit_tests:
       runs-on: windows-latest
@@ -39,11 +43,11 @@ jobs:
           dotnet nuget add source --username ${{inputs.USER_NAME}} --password ${{ secrets.PACKAGE_MANAGER_TOKEN }} --store-password-in-clear-text --name github ${{vars.PRIVATE_NUGET_FEED}}
         working-directory: ${{ inputs.WORKING_DIRECTORY }}
       - name: Restore dependencies
-        run: dotnet restore
+        run: dotnet restore ${{inputs.SOLUTION_RELATIVE_PATH}}
         working-directory: ${{ inputs.WORKING_DIRECTORY }}
         env:
           NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Run tests
-        run: dotnet test --no-restore --filter TestCategory=Unit
+        run: dotnet test ${{inputs.SOLUTION_RELATIVE_PATH}} --no-restore --filter TestCategory=Unit
         working-directory: ${{ inputs.WORKING_DIRECTORY }}
