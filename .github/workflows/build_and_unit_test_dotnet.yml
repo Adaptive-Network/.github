@@ -32,6 +32,7 @@ jobs:
         artifact_retention_days: ${{ inputs.ARTIFACT_RETENTION_DAYS }}
         working_directory: ${{ inputs.WORKING_DIRECTORY }}
         dotnet_version: ${{ inputs.DOTNET_VERSION }}
+        solution_relative_path: ${{inputs.SOLUTION_RELATIVE_PATH}}
       secrets: inherit
     unit_tests:
         uses: adaptive-network/.github/.github/workflows/unit_test_dotnet.yml@release
