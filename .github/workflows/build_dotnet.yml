@@ -21,6 +21,11 @@ on:
             description: 'List of .NET versions to build against'
             required: true
             type: string
+
+        SOLUTION_RELATIVE_PATH:
+            description: 'The name of the solution'
+            required: true
+            type: string
 jobs:
   build:
     name: Build project
@@ -48,13 +53,13 @@ jobs:
         working-directory: ${{ inputs.WORKING_DIRECTORY }}
 
       - name: Restore dependencies
-        run: dotnet restore
+        run: dotnet restore --solution ${{inputs.SOLUTION_RELATIVE_PATH}}
         working-directory: ${{ inputs.WORKING_DIRECTORY }}
         env:
           NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build solution
-        run: dotnet build --configuration Release --no-restore
+        run: dotnet build --solution ${{inputs.SOLUTION_RELATIVE_PATH}} --configuration Release --no-restore
         working-directory: ${{ inputs.WORKING_DIRECTORY }}
 
       - name: Upload build artifacts
