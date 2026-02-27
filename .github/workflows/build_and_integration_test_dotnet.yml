@@ -20,6 +20,10 @@ on:
             description: 'List of .NET versions to build against'
             required: true
             type: string
+        SOLUTION_RELATIVE_PATH:
+            description: 'The relative path of the solution'
+            required: true
+            type: string
 jobs:
     build:
       uses: adaptive-network/.github/.github/workflows/build_dotnet.yml@release
@@ -28,6 +32,7 @@ jobs:
         ARTIFACT_RETENTION_DAYS: ${{ inputs.ARTIFACT_RETENTION_DAYS }}
         WORKING_DIRECTORY: ${{ inputs.WORKING_DIRECTORY }}
         DOTNET_VERSION: ${{ inputs.DOTNET_VERSION }}
+        SOLUTION_RELATIVE_PATH: ${{inputs.SOLUTION_RELATIVE_PATH}}
       secrets: inherit
     unit_tests:
         uses: adaptive-network/.github/.github/workflows/unit_test_dotnet.yml@release
@@ -37,6 +42,7 @@ jobs:
           ARTIFACT_RETENTION_DAYS: ${{ inputs.ARTIFACT_RETENTION_DAYS }}
           WORKING_DIRECTORY: ${{ inputs.WORKING_DIRECTORY }}
           DOTNET_VERSION: ${{ inputs.DOTNET_VERSION }}
+          SOLUTION_RELATIVE_PATH: ${{inputs.SOLUTION_RELATIVE_PATH}}
         secrets: inherit
     integration_tests:
         uses: adaptive-network/.github/.github/workflows/integration_test_dotnet.yml@release
@@ -46,4 +52,5 @@ jobs:
           ARTIFACT_RETENTION_DAYS: ${{ inputs.ARTIFACT_RETENTION_DAYS }}
           WORKING_DIRECTORY: ${{ inputs.WORKING_DIRECTORY }}
           DOTNET_VERSION: ${{ inputs.DOTNET_VERSION }}
+          SOLUTION_RELATIVE_PATH: ${{inputs.SOLUTION_RELATIVE_PATH}}
         secrets: inherit
