@@ -20,6 +20,10 @@ on:
             description: 'List of .NET versions to build against'
             required: true
             type: string
+        SOLUTION_RELATIVE_PATH:
+            description: 'The file name of the solution'
+            required: true
+            type: string
 jobs:
     build:
       uses: adaptive-network/.github/.github/workflows/build_dotnet.yml@release
@@ -37,4 +41,5 @@ jobs:
           artifact_retention_days: ${{ inputs.ARTIFACT_RETENTION_DAYS }}
           working_directory: ${{ inputs.WORKING_DIRECTORY }}
           dotnet_version: ${{ inputs.DOTNET_VERSION }}
+          solution_relative_path: ${{inputs.SOLUTION_RELATIVE_PATH}}
         secrets: inherit
