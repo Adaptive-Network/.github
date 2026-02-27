@@ -21,7 +21,6 @@ on:
             description: 'List of .NET versions to build against'
             required: true
             type: string
-
         SOLUTION_RELATIVE_PATH:
             description: 'The name of the solution'
             required: true
